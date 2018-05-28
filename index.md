@@ -1,3 +1,3 @@
 ## Pages List
 
-1. [Error 404: No Pages Found](WilliamRukmansa.github.io/GLFWShooter)
+1. [Article: Simple Shooter Game with GLFW](https://williamrukmansa.github.io/GLFWShooter/)
