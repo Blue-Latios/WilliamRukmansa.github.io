@@ -1,5 +1,5 @@
 # Welcome to my first github page!
-<p align center> Hello!</p>
+<p align=center> Hello!</p>
 
 ## Pages List
 
