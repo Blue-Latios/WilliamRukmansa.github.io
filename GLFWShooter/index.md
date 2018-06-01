@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-	<html>
 	<head></head>
 	<body> <!--style="background-color:lightyellow;-->
 		<h1 id="using-glfw-and-simple-opengl-to-create-a-simple-shooter-game">Using GLFW (and simple OpenGL) to create a simple shooter game.</h1>
@@ -96,4 +95,3 @@
 		<p>To be continued...</p>
 		
 	</body>
-</html>
