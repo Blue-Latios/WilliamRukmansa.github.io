@@ -47,7 +47,7 @@ WIDTH = mode->width;
 GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Title", glfwGetPrimaryMonitor(), NULL);
 </code></pre></div>
 <p>Note: Don't forget to declare HEIGHT and WIDTH as global variables (variables outside the main program).</p>
-<p>If you plan on using windowed full screen, change the fourth parameter in glfwCreateWindow() to NULL. For more details on modifying windows, check the <a href="http://www.glfw.org/docs/latest/window_guide.html">GLFW Documentation</a>. Afterwards, make a function to change values from 0 to window height, into a number between -1.0 and 1.0, the same goes for window width. You can do that with these functions:</p>
+<p>If you plan on using windowed full screen, change the fourth parameter in glfwCreateWindow() to NULL. For more details on modifying windows, check the <a href="http://www.glfw.org/docs/latest/window_guide.html">GLFW Documentation</a>. Afterwards, make a function to change values from negative half of window height to half of window height, into a number between -1.0 and 1.0, the same goes for window width. You can do that with these functions:</p>
 <div class="highlight"><pre class="highlight"><code>float newWidth(float oldWidth) {
  return 2 * oldWidth / WIDTH;
 }
@@ -109,15 +109,15 @@ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   float direction;
   float health;
  public:
-  Enemy(int n, GLfloat* pointArray);
-  Enemy(int n, GLfloat* pointArray, int health);
+  Enemy(int n);
+  Enemy(int n, int health);
   virtual ~Enemy();
   
   float getSpeed() const;
   float getDirection() const;
   void setSpeed(float newSpeed);
   void setDirection(float newDirection);
-  void move();
+  virtual void move();
   bool isDead() const;
   
   GLfloat* getPoints();
@@ -126,14 +126,11 @@ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 </code></pre></div>
 <button type="button" onclick="if (document.getElementById('message4').style.display=='none'){ document.getElementById('message4').style.display='' } else { document.getElementById('message4').style.display='none' }">View Sample Code</button><br><br>
 <div id = "message5" style="display:none">
-<div class="highlight"><pre class="highlight"><code>Enemy::Enemy(int n, GLfloat* pointArray, int health) {
+<div class="highlight"><pre class="highlight"><code>Enemy::Enemy(int n, int health) {
  speed = 0;
  direction = 0;
  this->n = n;
  points = new GLfloat[n*2];
- for (int i = 0; i < n; i++) {
-  points[i] = pointArray[i];
- }
  this->health = health;
 }
 bool Enemy::isDead() const {
@@ -143,39 +140,76 @@ float toRadian(float degrees) { <span style="color: #aaaaaa;">//Helper function<
  return degrees*M_PI/180;
 }
 void Enemy::move() {
- for (int i = 0; i < n; i++) {
-  points[i] = points[i] + speed*cos(toRadian(direction));
-  points[i+1] = points[i+1] + speed*sin(toRadian(direction));
+ for (int i = 0; i < n*2; i+=2) {
+  points[i] = points[i] + newWidth(speed*cos(toRadian(direction)));
+  points[i+1] = points[i+1] + newHeight(speed*sin(toRadian(direction)));
  }
 }
 </code></pre></div>
-<p>The above code needs the functions we have used in the main cpp file, we need a way to use them in the Enemy class too. For that, make a helper cpp (and hpp), let's call it Bounds.cpp.</p>
-<div id = "message6" style="display:none" class="highlight"><pre class="highlight"><code><span style="color: #aaaaaa;">//include GLFW here</span>
-#define WIDTH 1280.0
-#define HEIGHT 720.0
+<p>We need a way to use the height and width in most files, other than the main program. For that, make a helper class, let's call it the Dimensions class, and move the newWidth and newHeight functions there.</p>
+<div id = "message6" style="display:none" class="highlight"><pre class="highlight"><code>class Dimensions {
+ private:
+  static double width, height;
+ public:
+  Dimensions(); //ctor (unused)
+  Dimensions(double w, double h);
+  virtual ~Dimensions();
+  double getWidth() const;
+  double getHeight() const;
+};
 
-<span style="color: #aaaaaa;">//Start cpp codes and definitions</span>
+float newWidth(float oldWidth);
+float newHeight(float oldHeight);
+
+<span style="color: #aaaaaa;">//Cpp code</span>
+double Dimensions::width;
+double Dimensions::height;
+
+Dimensions::Dimensions() {
+}
+Dimensions::Dimensions(double w, double h) {
+ width = w;
+ height = h;
+}
+Dimensions::~Dimensions() {
+}
+double Dimensions::getWidth() const {
+ return width;
+}
+double Dimensions::getHeight() const {
+ return height;
+}
+
 float newWidth(float oldWidth) {
- return 2 * oldWidth / WIDTH;
+ return 2*oldWidth / Dimensions().getWidth();
 }
 float newHeight(float oldHeight) {
- return 2 * oldHeight / HEIGHT;
+ return 2*oldHeight / Dimensions().getHeight();
 }
 </code></pre></div>
-<button type="button" onclick="if (document.getElementById('message6').style.display=='none'){ document.getElementById('message6').style.display='' } else { document.getElementById('message6').style.display='none' }">Bounds.cpp Code</button>
+<button type="button" onclick="if (document.getElementById('message6').style.display=='none'){ document.getElementById('message6').style.display='' } else { document.getElementById('message6').style.display='none' }">Dimensions Code</button>
 </div>
 <button type="button" onclick="if (document.getElementById('message5').style.display=='none'){ document.getElementById('message5').style.display='' } else { document.getElementById('message5').style.display='none' }">Click Here For Partial cpp Code</button>
 <p>Now, let's test the features. Let's make a triangle enemy that goes to the bottom of the screen and close the window if it touches the bottom of the screen. We can do it like this:</p>
-<div class="highlight"><pre class="highlight"><code><code><span style="color: #aaaaaa;">//Outside main loop</span>
-GLfloat myTriangle[3*2];
- myTriangle[0] = newWidth(100); myTriangle[1] = newHeight(HEIGHT);
- myTriangle[2] = newWidth(-100); myTriangle[3] = newHeight(HEIGHT);
- myTriangle[4] = newWidth(0); myTriangle[5] = newHeight(HEIGHT-150);
- Enemy firstEnemy(3, myTriangle);
+<div class="highlight"><pre class="highlight"><code><span style="color: #aaaaaa;">//Outside main loop</span>
+<span style="color: #aaaaaa;">//Use the Dimensions class like this:</span>
+double HEIGHT;
+double WIDTH;
+const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+HEIGHT = mode->height;
+WIDTH = mode->width;
+Dimensions(WIDTH, HEIGHT);
+GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "TestDriver", NULL, NULL);
+ 
+Enemy firstEnemy(3);
+ firstEnemy.getPoints()[0] = newWidth(100); firstEnemy.getPoints()[1] = newHeight(HEIGHT);
+ firstEnemy.getPoints()[2] = newWidth(-100); firstEnemy.getPoints()[3] = newHeight(HEIGHT);
+ firstEnemy.getPoints()[4] = newWidth(0); firstEnemy.getPoints()[5] = newHeight(HEIGHT-150);
+ 
  firstEnemy.setSpeed(6);
  firstEnemy.setDirection(270);
 
-<div class="highlight"><pre class="highlight"><code><span style="color: #aaaaaa;">//Inside main loop</span>
+<span style="color: #aaaaaa;">//Inside main loop</span>
 if (firstEnemy.getPoints()[5] < -1.0)
  glfwSetWindowShouldClose(window, GLFW_TRUE);
 else {
@@ -184,5 +218,71 @@ else {
  glVertexPointer (2, GL_FLOAT, 0, firstEnemy.getPoints());
  glDrawArrays(GL_TRIANGLES, 0, 3);
 }
+</code></pre></div>
+<p>It's not convenient if we want to make a lot of obstacles and we need to define every point. One of the ways to solve this is to make a class that automatically creates the shape that you need. For now, let's make a Square class. In this way, we can also define features that cannot be previously implemented in Enemy class, one of them is collision checking.</p>
+<div class="highlight" id = "message7" style="display:none"><pre class="highlight"><code>class Square : public Enemy {
+ protected:
+  float side;
+  float x, y;
+ public:
+  Square(float x, float y, float side);
+  Square(float x, float y, float side, int health);
+  virtual ~Square();
+
+  float getSide() const;
+  void setSide(float newSide);
+  bool collideWith(float x, float y);
+  void move();
+};
+<span style="color: #aaaaaa;">//Partial cpp code</span>
+Square::Square(float x, float y, float side, int health) : Enemy(4, health) {
+ this->side = side;
+ points[0] = newWidth(x - side/2);
+ points[1] = newHeight(y - side/2);
+  
+ points[2] = newWidth(x - side/2);
+ points[3] = newHeight(y + side/2);
+  
+ points[4] = newWidth(x + side/2);
+ points[5] = newHeight(y + side/2);
+  
+ points[6] = newWidth(x + side/2);
+ points[7] = newHeight(y - side/2);
+ this->x = newWidth(x);
+ this->y = newHeight(y);
+}
+Square::Square(float x, float y, float side) : Square(x, y, side, 1) {
+}
+Square::~Square() {
+}
+void Square::move() {
+ Enemy::move();
+ x = x + newWidth(speed*cos(toRadian(direction)));
+ y = y + newHeight(speed*sin(toRadian(direction)));
+}
+bool Square::collideWith(float x, float y) {
+ x = newWidth(x);
+ y = newHeight(y);
+ float xside = newWidth(side/2);
+ float yside = newHeight(side/2);
+ return (x > this->x - xside && x < this->x + xside) && (y > this->y - yside && y < this->y + yside);
+}
+</code></pre></div>
+<button type="button" onclick="if (document.getElementById('message7').style.display=='none'){ document.getElementById('message7').style.display='' } else { document.getElementById('message7').style.display='none' }">View Sample Code</button>
+<p>Here is an example code of a square alternatingly going left and right:</p>
+<div class="highlight"><pre class="highlight"><code><span style="color: #aaaaaa;">//Outside main loop</span>
+Square secondEnemy(0, 0, 100);
+ secondEnemy.setSpeed(5);
+ secondEnemy.setDirection(180);
+
+<span style="color: #aaaaaa;">//Inside main loop</span>
+secondEnemy.move();
+if (secondEnemy.collideWith(-WIDTH/2, 0))
+ secondEnemy.setDirection(0);
+else if (secondEnemy.collideWith(WIDTH/2, 0))
+ secondEnemy.setDirection(180);
+glColor3f(1.0,0.0,0.0);
+glVertexPointer (2, GL_FLOAT, 0, secondEnemy.getPoints());
+glDrawArrays(GL_QUADS, 0, 4);
 </code></pre></div>
 <p>To be continued...</p>
