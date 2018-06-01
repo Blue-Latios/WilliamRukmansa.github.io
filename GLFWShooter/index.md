@@ -4,6 +4,7 @@ code {
  text-shadow: 0 0 3px #00ff00;
 }
 </style>
+
 <h1 id="using-glfw-and-simple-opengl-to-create-a-simple-shoot-'em-up-game">Using GLFW (and simple OpenGL) to create a simple shoot 'em up game.</h1>
 <p>OpenGL is the first programming utility that I use during my days of programming and doing tasks. At first it is confusing in many ways (because I am a confused person). It works with C and most of C's friends, one of them that I like to use is C++.</p>
 <p>Just a heads up, this is usually just for testing or for fun. If you want to make a serious or complete game, I suggest searching for guides deeper in <a href="https://github.com/search">Github</a> or other websites for more advanced tutorials.</p>
@@ -116,6 +117,7 @@ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   float getDirection() const;
   void setSpeed(float newSpeed);
   void setDirection(float newDirection);
+  void damage(int dmg);
   virtual void move();
   bool isDead() const;
   
@@ -198,7 +200,7 @@ const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 HEIGHT = mode->height;
 WIDTH = mode->width;
 Dimensions(WIDTH, HEIGHT);
-GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "TestDriver", NULL, NULL);
+GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "TestDriver", glfwGetPrimaryMonitor(), NULL);
  
 Enemy firstEnemy(3);
  firstEnemy.getPoints()[0] = newWidth(100); firstEnemy.getPoints()[1] = newHeight(HEIGHT);
@@ -229,6 +231,8 @@ else {
   virtual ~Square();
 
   float getSide() const;
+  float getX() const;
+  float getY() const;
   void setSide(float newSide);
   bool collideWith(float x, float y);
   void move();
@@ -247,8 +251,8 @@ Square::Square(float x, float y, float side, int health) : Enemy(4, health) {
   
  points[6] = newWidth(x + side/2);
  points[7] = newHeight(y - side/2);
- this->x = newWidth(x);
- this->y = newHeight(y);
+ this->x = x;
+ this->y = y;
 }
 Square::Square(float x, float y, float side) : Square(x, y, side, 1) {
 }
@@ -256,15 +260,11 @@ Square::~Square() {
 }
 void Square::move() {
  Enemy::move();
- x = x + newWidth(speed*cos(toRadian(direction)));
- y = y + newHeight(speed*sin(toRadian(direction)));
+ x = x + speed*cos(toRadian(direction));
+ y = y + speed*sin(toRadian(direction));
 }
 bool Square::collideWith(float x, float y) {
- x = newWidth(x);
- y = newHeight(y);
- float xside = newWidth(side/2);
- float yside = newHeight(side/2);
- return (x > this->x - xside && x < this->x + xside) && (y > this->y - yside && y < this->y + yside);
+ return (x > this->x - side/2 && x < this->x + side/2) && (y > this->y - side/2 && y < this->y + side/2);
 }
 </code></pre></div>
 <button type="button" onclick="if (document.getElementById('message7').style.display=='none'){ document.getElementById('message7').style.display='' } else { document.getElementById('message7').style.display='none' }">View Sample Code</button>
@@ -280,8 +280,192 @@ if (secondEnemy.collideWith(-WIDTH/2, 0))
  secondEnemy.setDirection(0);
 else if (secondEnemy.collideWith(WIDTH/2, 0))
  secondEnemy.setDirection(180);
-glColor3f(1.0,0.0,0.0);
+glColor3f(0.0,1.0,0.0);
 glVertexPointer (2, GL_FLOAT, 0, secondEnemy.getPoints());
 glDrawArrays(GL_QUADS, 0, 4);
 </code></pre></div>
-<p>To be continued...</p>
+<p>For now, let's use the Square class to make the gameplay, which consists of a shooter, an enemy, the shots by your avatar and the shots by enemies. If you're going to use a lot of functions that manipulate the Squares and other objects, make the objects as global variables.</p>
+<p>Let's focus on making an avatar. For now, let's make it as a small octagon. Make this as a function, and then put the function in the main loop.</p>
+<div class="highlight"><pre class="highlight"><code>GLfloat avatarPoints[16];
+double xpos, ypos;
+bool goingUp = false,
+ goingDown = false,
+ goingLeft = false,
+ goingRight = false;
+float sqrtTwo = sqrt(2);
+void drawAvatar() {
+ if (goingUp && ypos < HEIGHT/2)
+  ypos += 4;
+ else if (goingDown && ypos > -HEIGHT/2)
+  ypos -= 4;
+ if (goingRight && xpos < WIDTH/2)
+  xpos += 4;
+ else if (goingLeft && xpos > -WIDTH/2)
+  xpos -= 4;
+ glColor3f(1.0,0.0,0.0);
+ avatarPoints[0] = newWidth(xpos-4);
+ avatarPoints[1] = newHeight(ypos-4);
+ avatarPoints[2] = newWidth(xpos);
+ avatarPoints[3] = newHeight(ypos-4*sqrtTwo);
+ avatarPoints[4] = newWidth(xpos+4);
+ avatarPoints[5] = newHeight(ypos-4);
+ avatarPoints[6] = newWidth(xpos+4*sqrtTwo);
+ avatarPoints[7] = newHeight(ypos);
+ avatarPoints[8] = newWidth(xpos+4);
+ avatarPoints[9] = newHeight(ypos+4);
+ avatarPoints[10] = newWidth(xpos);
+ avatarPoints[11] = newHeight(ypos+4*sqrtTwo);
+ avatarPoints[12] = newWidth(xpos-4);
+ avatarPoints[13] = newHeight(ypos+4);
+ avatarPoints[14] = newWidth(xpos-4*sqrtTwo);
+ avatarPoints[15] = newHeight(ypos);
+ 
+ glVertexPointer (2, GL_FLOAT, 0, avatarPoints);
+ glDrawArrays(GL_POLYGON, 0, 8);
+}
+</code></pre></div>
+<p>Note the if-else conditions. This is done so that the avatar does not go off screen. To control the avatar, make use of the key or mouse callback functions. Let's control the avatar with the keyboard.</p>
+<div class="highlight" id = "message8" style="display:none"><pre class="highlight"><code>void keyCallback(GLFWwindow* window, int key, int scanc, int act, int mods) {
+ if (act == GLFW_PRESS) {
+  switch (key) {
+   case GLFW_KEY_UP: goingUp = true;
+   break;
+   case GLFW_KEY_DOWN: goingDown = true;
+   break;
+   case GLFW_KEY_RIGHT: goingRight = true;
+   break;
+   case GLFW_KEY_LEFT: goingLeft = true;
+   break;
+   case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE);
+   break;
+  }
+ } else if (act == GLFW_RELEASE) {
+  switch (key) {
+   case GLFW_KEY_UP: goingUp = false;
+   break;
+   case GLFW_KEY_DOWN: goingDown = false;
+   break;
+   case GLFW_KEY_RIGHT: goingRight = false;
+   break;
+   case GLFW_KEY_LEFT: goingLeft = false;
+   break;
+  }
+ }
+}
+</code></pre></div>
+<button type="button" onclick="if (document.getElementById('message8').style.display=='none'){ document.getElementById('message8').style.display='' } else { document.getElementById('message8').style.display='none' }">View Sample Code</button>
+<p>If everything works fine, and added with the secondEnemy from before, you should be able to get a moving square as well as a cursor controllable with the arrow keys.</p>
+<center><img src="img4.png" alt="" border="4" style="border-color: white; width: 200px; height: auto"></center>
+<p>Next, we need to define hFor now, we will use small squares as its bullets. Since bullets are not exactly "enemies", you can change the name of the Enemy class, make a similar class (except it has no health), or try something else that suits you. For now, let's just ignore the class naming and use Squares to represent shots. To store the shots, enemies, and other stuff, I'm going to use a C++ library, list. See <a href="http://www.cplusplus.com/reference/list/list/">here</a> for more details.</p>
+<p>First, make global lists to store shots.</p>
+<div class="highlight"><pre class="highlight"><code>list&lt;Square&gt; ShotsList;
+list&lt;Square&gt;::iterator ShotsIter;
+list&lt;Square&gt; SquareList;
+list&lt;Square&gt;::iterator SquareIter;
+</code></pre></div>
+<p>Next, we define how to shoot with keyboard. There are a lot of ways to shoot, by holding a button, having 2 buttons for 2 different shots, and so on. For now, pressing the spacebar button releases 1 square bullet. Insert this in the key callback function, when a key is pressed.</p>
+<div class="highlight"><pre class="highlight"><code>case GLFW_KEY_SPACE: {
+ Square shot(xpos, ypos, 12);
+ shot.setSpeed(5);
+ shot.setDirection(90);
+ ShotsList.push_front(shot);
+} break;
+</code></pre></div>
+<p>Next, make a function to check if a shot damages an enemy. If it collides with an enemy, remove the shot and reduce the health of the enemy. This is a little bit tricky if you haven't used lists yet.</p>
+<div class="highlight" id = "message9" style="display:none"><pre class="highlight"><code>void checkShotDamage() {
+ if (!SquareList.empty()) {
+  SquareIter = SquareList.begin();
+  while (SquareIter !=  SquareList.end()) {
+   if (!ShotsList.empty()) {
+    ShotsIter = ShotsList.begin();
+    while (ShotsIter != ShotsList.end()) {
+     if ((*SquareIter).collideWith((*ShotsIter).getX(), (*ShotsIter).getY())) {
+      (*SquareIter).damage(1);
+      ShotsIter = ShotsList.erase(ShotsIter);
+     } else {
+      ShotsIter++;
+     }
+    }
+   }
+   SquareIter++;
+  }
+ }
+}
+</code></pre></div>
+<button type="button" onclick="if (document.getElementById('message9').style.display=='none'){ document.getElementById('message9').style.display='' } else { document.getElementById('message9').style.display='none' }">View Sample Code</button>
+<p>Lastly, remove enemies that are under a certain health (usually 0), and then draw the whole screen. For now, we combine them in one function.</p>
+<div class="highlight" id = "message10" style="display:none"><pre class="highlight"><code>void drawStuff() {
+ if (!SquareList.empty()) {
+  glColor3f(1.0,1.0,1.0);
+  SquareIter = SquareList.begin();
+  while (SquareIter != SquareList.end()) {
+   if ((*SquareIter).isDead()) {
+    SquareIter = SquareList.erase(SquareIter);
+   } else {
+    glVertexPointer (2, GL_FLOAT, 0, (*SquareIter).getPoints());
+    glDrawArrays(GL_QUADS, 0, 4);
+    SquareIter++;
+   }
+  }
+ }
+ 
+ if (!ShotsList.empty()) {
+  glColor3f(0.0,0.0,1.0);
+  ShotsIter = ShotsList.begin();
+  while (ShotsIter != ShotsList.end()) {
+   if ((*ShotsIter).getY() > HEIGHT) {
+    ShotsIter = ShotsList.erase(ShotsIter);
+   } else {
+    glVertexPointer (2, GL_FLOAT, 0, (*ShotsIter).getPoints());
+    glDrawArrays(GL_QUADS, 0, 4);
+    ShotsIter++;
+   }
+  }
+ }
+}
+</code></pre></div>
+<button type="button" onclick="if (document.getElementById('message10').style.display=='none'){ document.getElementById('message10').style.display='' } else { document.getElementById('message10').style.display='none' }">View Sample Code</button>
+<p>Last, make a function that moves all available objects.</p>
+<div class="highlight" id = "message11" style="display:none"><pre class="highlight"><code>void moveAll() {
+ if (!SquareList.empty()) {
+  SquareIter = SquareList.begin();
+  while (SquareIter != SquareList.end()) {
+   (*SquareIter).move();
+   SquareIter++;
+  }
+ }
+ 
+ if (!ShotsList.empty()) {
+  ShotsIter = ShotsList.begin();
+  while (ShotsIter != ShotsList.end()) {
+   (*ShotsIter).move();
+   ShotsIter++;
+  }
+ }
+}
+</code></pre></div>
+<button type="button" onclick="if (document.getElementById('message11').style.display=='none'){ document.getElementById('message11').style.display='' } else { document.getElementById('message11').style.display='none' }">View Sample Code</button>
+<p>Now in the main loop, put all the functions. Also, before the main loop, add health to the secondEnemy, and this time, put it in the SquareList.</p>
+<div class="highlight"><pre class="highlight"><code>Square secondEnemy(0, 0, 100, 10);
+secondEnemy.setSpeed(5);
+secondEnemy.setDirection(180);
+SquareList.push_front(secondEnemy);
+<span style="color: #aaaaaa;">//Main loop</span>
+ SquareIter = SquareList.begin();
+ if ((*SquareIter).collideWith(-WIDTH/2, 0))
+  (*SquareIter).setDirection(0);
+ else if ((*SquareIter).collideWith(WIDTH/2, 0))
+  (*SquareIter).setDirection(180);
+  
+ drawAvatar();
+ checkShotDamage();
+ drawStuff();
+ moveAll();
+ if (SquareList.empty()) {
+  glfwSetWindowShouldClose(window, GLFW_TRUE);
+  cout << "Enemy defeated"; <span style="color: #aaaaaa;">//Optional message, works on Linux</span>
+ }
+</code></pre></div>
+<center><img src="img5.png" alt="" border="4" style="border-color: white; width: 450px; height: auto"></center>
+<p>Congratulations! You have made a simple shmup stage!</p>
+<p>To be continued with more stuff...</p>
