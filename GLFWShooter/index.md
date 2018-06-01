@@ -356,7 +356,7 @@ void drawAvatar() {
 <button type="button" onclick="if (document.getElementById('message8').style.display=='none'){ document.getElementById('message8').style.display='' } else { document.getElementById('message8').style.display='none' }">View Sample Code</button>
 <p>If everything works fine, and added with the secondEnemy from before, you should be able to get a moving square as well as a cursor controllable with the arrow keys.</p>
 <center><img src="img4.png" alt="" border="4" style="border-color: white; width: 200px; height: auto"></center>
-<p>Next, we need to define hFor now, we will use small squares as its bullets. Since bullets are not exactly "enemies", you can change the name of the Enemy class, make a similar class (except it has no health), or try something else that suits you. For now, let's just ignore the class naming and use Squares to represent shots. To store the shots, enemies, and other stuff, I'm going to use a C++ library, list. See <a href="http://www.cplusplus.com/reference/list/list/">here</a> for more details.</p>
+<p>Next, we need to define how to store shots and obstacles. For now, we will use small squares as its bullets. Since bullets are not exactly "enemies", you can change the name of the Enemy class, make a similar class (except it has no health), or try something else that suits you. For now, let's just ignore the class naming and use Squares to represent shots. To store the shots, enemies, and other stuff, I'm going to use a C++ library, list. See <a href="http://www.cplusplus.com/reference/list/list/">here</a> for more details.</p>
 <p>First, make global lists to store shots.</p>
 <div class="highlight"><pre class="highlight"><code>list&lt;Square&gt; ShotsList;
 list&lt;Square&gt;::iterator ShotsIter;
