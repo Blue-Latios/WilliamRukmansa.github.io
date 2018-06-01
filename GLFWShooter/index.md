@@ -175,7 +175,7 @@ GLfloat myTriangle[3*2];
  firstEnemy.setSpeed(6);
  firstEnemy.setDirection(270);
 
-<code><span style="color: #aaaaaa;">//Inside main loop</span>
+<div class="highlight"><pre class="highlight"><code><span style="color: #aaaaaa;">//Inside main loop</span>
 if (firstEnemy.getPoints()[5] < -1.0)
  glfwSetWindowShouldClose(window, GLFW_TRUE);
 else {
