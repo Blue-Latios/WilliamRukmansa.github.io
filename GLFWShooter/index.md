@@ -12,7 +12,7 @@ code {
 <blockquote><p>sudo apt-get install g++</p></blockquote>
 <p>You will also need <a href="http://www.glfw.org/download.html">GLFW</a>, although you're free to use other OpenGL utilities as well.</p>
 <p>Once they have been downloaded, you will needa basic concept of object-oriented programming (or just explore C++ for yourself). There are many ways to represent a shoot 'em up (or shmup) game, so it is encouraged for you to find your own style afterwards.</p>
-<p align="center"><img src="Shooter1.png" alt="" border="4" style="border-color: white" width = 600></p>
+<p align="center"><img src="Shooter1.png" alt="" border="4" style="border-color: white" width = 600></img></p>
 <p>First of all, get started with GLFW <a href="http://www.glfw.org/docs/latest/quick.html">here</a>. Put those codes in the main program <span style="color: #00ff00;">int main()</span>. You will need at least these codes in the body:</p>
 <ul style="list-style-type: square;">
  <li>the glfwInit</li>
