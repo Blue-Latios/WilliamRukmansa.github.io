@@ -396,7 +396,7 @@ list&lt;Square&gt;::iterator SquareIter;
 <p>Lastly, remove enemies that are under a certain health (usually 0), and then draw the whole screen. For now, we combine them in one function.</p>
 <div class="highlight" id = "message10" style="display:none"><pre class="highlight"><code>void drawStuff() {
  if (!SquareList.empty()) {
-  glColor3f(1.0,1.0,1.0);
+  glColor3f(0.0,1.0,0.0);
   SquareIter = SquareList.begin();
   while (SquareIter != SquareList.end()) {
    if ((*SquareIter).isDead()) {
@@ -469,3 +469,16 @@ SquareList.push_front(secondEnemy);
 <center><img src="img5.png" alt="" border="4" style="border-color: white; width: 450px; height: auto"></center>
 <p>Congratulations! You have made a simple shmup stage!</p>
 <p>To be continued with more stuff...</p>
+<br>
+<p>While searching for other stuff on shoot 'em ups, how about go ahead and try:</p>
+<ul style="list-style-type: square;">
+ <li>Adding angle property to the obstacles</li>
+ <li>Add a Triangle class</li>
+ <li>Make the enemy shoot bullets at you (will probably be covered in next update)</li>
+ <li>Controlling movement by changing direction and speed of obstacle</li>
+ <li>Explicitly control movement by manually setting X and Y of obstacles</li>
+ <li>Control the avatar with mouse</li>
+ <li>Create a bomb function</li>
+ <li>Implement lives feature</li>
+ <li>And many more stuff you can do...</li>
+</ul>
