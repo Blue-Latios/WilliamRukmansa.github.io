@@ -12,7 +12,7 @@ code {
 <blockquote><p>sudo apt-get install g++</p></blockquote>
 <p>You will also need <a href="http://www.glfw.org/download.html">GLFW</a>, although you're free to use other OpenGL utilities as well.</p>
 <p>Once they have been downloaded, you will needa basic concept of object-oriented programming (or just explore C++ for yourself). There are many ways to represent a shoot 'em up (or shmup) game, so it is encouraged for you to find your own style afterwards.</p>
-<p align="center"><img src="Shooter1.png" alt="" border="4" width = 600></img></p>
+<p align="center"><img src="Shooter1.png" alt="" width = 600></img></p>
 <p>First of all, get started with GLFW <a href="http://www.glfw.org/docs/latest/quick.html">here</a>. Put those codes in the main program <span style="color: #00ff00;">int main()</span>. You will need at least these codes in the body:</p>
 <ul style="list-style-type: square;">
  <li>the glfwInit</li>
@@ -38,7 +38,7 @@ code {
 glEnd();
 </code></pre></div>
 <p>And it will produce the following output: </p>
-<p><img src="img1.png" alt="" border="4" style="border-color: white" width = 200 align="right">The pointx and pointy values represent the position relative to the center. For example, glVertex2f(1.0, 0.0) means that the point will be at the top and center of the screen. It is possible to draw points beyond the screen (try changing one of the vertexes to glVertext2f(2.0, 0.0)). If you want to get pixel values, get and store the window's width and length as you use glfwCreateWindow(). Alternatively, if you plan on going full screen, get window width and height from the primary monitor like this:</p>
+<p><img src="img1.png" alt="" border="4" style="border-color: white" align="right">The pointx and pointy values represent the position relative to the center. For example, glVertex2f(1.0, 0.0) means that the point will be at the top and center of the screen. It is possible to draw points beyond the screen (try changing one of the vertexes to glVertext2f(2.0, 0.0)). If you want to get pixel values, get and store the window's width and length as you use glfwCreateWindow(). Alternatively, if you plan on going full screen, get window width and height from the primary monitor like this:</p>
 <div class="highlight"><pre class="highlight"><code>const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
 HEIGHT = mode->height;
