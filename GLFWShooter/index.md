@@ -1,10 +1,9 @@
-<!--<style>
+<style>
 code {
-	color: #99ff99;
-	text-shadow: 0 0 3px #00ff00;
+ color: #99ff99;
+ text-shadow: 0 0 3px #00ff00;
 }
-</style>-->
-<!--<body style="background-color:lightyellow;></body>-->
+</style>
 
 <h1 id="using-glfw-and-simple-opengl-to-create-a-simple-shoot-'em-up-game">Using GLFW (and simple OpenGL) to create a simple shoot 'em up game.</h1>
 <p>OpenGL is the first programming utility that I use during my days of programming and doing tasks. At first it is confusing in many ways (because I am a confused person). It works with C and most of C's friends, one of them that I like to use is C++.</p>
@@ -97,4 +96,93 @@ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 <div id = "message3" style="display:none">
 <p>The classic way of adding a feature into the game is to add a high score, which can be determined by a number of factors, such as number of enemies destroyed, what kinds of enemies are destroyed, accuracy, etc. You can also add lives to the game so that your avatar has a second chance to fight. You can also add a timer in the gameplay, it's tricky since you have to draw your own numbers on the screen, but it is possible. You can also decorate the game with a main menu, a help menu, and even settings. If you're ambitious, you can also add your soundtrack in the game. Do explore what can be done.</p></div>
 <button type="button" onclick="if (document.getElementById('message3').style.display=='none'){ document.getElementById('message3').style.display='' } else { document.getElementById('message3').style.display='none' }">Show / Hide</button>
+<h2>Making The Mechanics: Stage One</h2>
+<p>If you have a bit of object-oriented programming knowledge, this might seem a bit easier to you. Let's get through this step-by-step.</p>
+<h3>The Shapes</h3>
+<p>We need to define the characteristics of each obstacle. This is where object-oriented programming comes in. For now, let's say that every enemy has points to draw, health, speed and direction of movement. We will define this in a class called Enemy. (To make it better, make the class inherit a Point class)</p>
+<div class="highlight" id = "message4" style="display:none"><pre class="highlight"><code>class Enemy {
+ protected:
+  GLfloat *points;
+  int n; //number of Points
+  
+  float speed;
+  float direction;
+  float health;
+ public:
+  Enemy(int n, GLfloat* pointArray);
+  Enemy(int n, GLfloat* pointArray, int health);
+  virtual ~Enemy();
+  
+  float getSpeed() const;
+  float getDirection() const;
+  void setSpeed(float newSpeed);
+  void setDirection(float newDirection);
+  void move();
+  bool isDead() const;
+  
+  GLfloat* getPoints();
+  int getN() const;
+};
+</code></pre></div>
+<button type="button" onclick="if (document.getElementById('message4').style.display=='none'){ document.getElementById('message4').style.display='' } else { document.getElementById('message4').style.display='none' }">View Sample Code</button><br><br>
+<div id = "message5" style="display:none">
+<div class="highlight"><pre class="highlight"><code>Enemy::Enemy(int n, GLfloat* pointArray, int health) {
+ speed = 0;
+ direction = 0;
+ this->n = n;
+ points = new GLfloat[n*2];
+ for (int i = 0; i < n; i++) {
+  points[i] = pointArray[i];
+ }
+ this->health = health;
+}
+bool Enemy::isDead() const {
+ return (health <= 0);
+}
+float toRadian(float degrees) { <span style="color: #aaaaaa;">//Helper function</span>
+ return degrees*M_PI/180;
+}
+void Enemy::move() {
+ for (int i = 0; i < n; i++) {
+  points[i] = points[i] + speed*cos(toRadian(direction));
+  points[i+1] = points[i+1] + speed*sin(toRadian(direction));
+ }
+}
+</code></pre></div>
+<p>The above code needs the functions we have used in the main cpp file, we need a way to use them in the Enemy class too. For that, make a helper cpp (and hpp), let's call it Bounds.cpp.</p>
+<div id = "message6" style="display:none" class="highlight"><pre class="highlight"><code><span style="color: #aaaaaa;">//include GLFW here</span>
+#define WIDTH 1280.0
+#define HEIGHT 720.0
 
+<span style="color: #aaaaaa;">//Start cpp codes and definitions</span>
+float newWidth(float oldWidth) {
+ return 2 * oldWidth / WIDTH;
+}
+float newHeight(float oldHeight) {
+ return 2 * oldHeight / HEIGHT;
+}
+</code></pre></div>
+<button type="button" onclick="if (document.getElementById('message6').style.display=='none'){ document.getElementById('message6').style.display='' } else { document.getElementById('message6').style.display='none' }">Bounds.cpp Code</button>
+</div>
+<button type="button" onclick="if (document.getElementById('message5').style.display=='none'){ document.getElementById('message5').style.display='' } else { document.getElementById('message5').style.display='none' }">Click Here For Partial cpp Code</button>
+<p>Now, let's test the features. Let's make a triangle enemy that goes to the bottom of the screen and close the window if it touches the bottom of the screen. We can do it like this:</p>
+<div class="highlight"><pre class="highlight"><code><code><span style="color: #aaaaaa;">//Outside main loop</span>
+GLfloat myTriangle[3*2];
+ myTriangle[0] = newWidth(100); myTriangle[1] = newHeight(HEIGHT);
+ myTriangle[2] = newWidth(-100); myTriangle[3] = newHeight(HEIGHT);
+ myTriangle[4] = newWidth(0); myTriangle[5] = newHeight(HEIGHT-150);
+ Enemy firstEnemy(3, myTriangle);
+ firstEnemy.setSpeed(6);
+ firstEnemy.setDirection(270);
+
+<code><span style="color: #aaaaaa;">//Inside main loop</span>
+if (firstEnemy.getPoints()[5] < -1.0)
+ glfwSetWindowShouldClose(window, GLFW_TRUE);
+else {
+ firstEnemy.move();
+ glColor3f(1.0,1.0,0.0);
+ glVertexPointer (2, GL_FLOAT, 0, firstEnemy.getPoints());
+ glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+</code></pre></div>
+<p>To be continued...</p>
