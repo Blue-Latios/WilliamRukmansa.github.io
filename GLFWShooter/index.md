@@ -4,7 +4,6 @@ code {
  text-shadow: 0 0 3px #00ff00;
 }
 </style>
-
 <h1 id="using-glfw-and-simple-opengl-to-create-a-simple-shoot-'em-up-game">Using GLFW (and simple OpenGL) to create a simple shoot 'em up game.</h1>
 <p>OpenGL is the first programming utility that I use during my days of programming and doing tasks. At first it is confusing in many ways (because I am a confused person). It works with C and most of C's friends, one of them that I like to use is C++.</p>
 <p>Just a heads up, this is usually just for testing or for fun. If you want to make a serious or complete game, I suggest searching for guides deeper in <a href="https://github.com/search">Github</a> or other websites for more advanced tutorials.</p>
@@ -12,7 +11,7 @@ code {
 <blockquote><p>sudo apt-get install g++</p></blockquote>
 <p>You will also need <a href="http://www.glfw.org/download.html">GLFW</a>, although you're free to use other OpenGL utilities as well.</p>
 <p>Once they have been downloaded, you will needa basic concept of object-oriented programming (or just explore C++ for yourself). There are many ways to represent a shoot 'em up (or shmup) game, so it is encouraged for you to find your own style afterwards.</p>
-<p align="center"><img src="Shooter1.png" alt="" width = 600></img></p>
+<p align=center><img src="Shooter1.png" alt="" border="4" style="border-color: white; width: 600px; height: auto"></p>
 <p>First of all, get started with GLFW <a href="http://www.glfw.org/docs/latest/quick.html">here</a>. Put those codes in the main program <span style="color: #00ff00;">int main()</span>. You will need at least these codes in the body:</p>
 <ul style="list-style-type: square;">
  <li>the glfwInit</li>
@@ -38,7 +37,7 @@ code {
 glEnd();
 </code></pre></div>
 <p>And it will produce the following output: </p>
-<p><img src="img1.png" alt="" border="4" style="border-color: white" align="right">The pointx and pointy values represent the position relative to the center. For example, glVertex2f(1.0, 0.0) means that the point will be at the top and center of the screen. It is possible to draw points beyond the screen (try changing one of the vertexes to glVertext2f(2.0, 0.0)). If you want to get pixel values, get and store the window's width and length as you use glfwCreateWindow(). Alternatively, if you plan on going full screen, get window width and height from the primary monitor like this:</p>
+<p><img src="img1.png" alt="" border="4" style="border-color: white; width: 200px; height: auto" align=right>The pointx and pointy values represent the position relative to the center. For example, glVertex2f(1.0, 0.0) means that the point will be at the top and center of the screen. It is possible to draw points beyond the screen (try changing one of the vertexes to glVertext2f(2.0, 0.0)). If you want to get pixel values, get and store the window's width and length as you use glfwCreateWindow(). Alternatively, if you plan on going full screen, get window width and height from the primary monitor like this:</p>
 <div class="highlight"><pre class="highlight"><code>const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
 HEIGHT = mode->height;
@@ -57,7 +56,7 @@ float newHeight(float oldHeight) {
 }
 </code></pre></div>
 <p>And now, you can modify the above code to have pixel lengths. The following code will result this image:</p>
-<img src="img2.png" alt="" border="4" style="border-color: white" width = 200 align="right">
+<img src="img2.png" alt="" border="4" style="border-color: white; width: 200px; height: auto" align=right>
 <div class="highlight"><pre class="highlight"><code>glBegin(GL_QUADS);
  glVertex2f(newWidth(100), newHeight(0.0));
  glVertex2f(newWidth(0.0), newHeight(100));
@@ -66,7 +65,7 @@ float newHeight(float oldHeight) {
 glEnd();
 </code></pre></div>
 <p>This method, although straightforward, is somewhat tedious as we have to insert the function everytime we need to draw a point. Another method, which is a bit easier to use, is the glDrawArrays() method. First, enter <span style="color: #00ff00;">glEnableClientState (GL_VERTEX_ARRAY);</span> before the main loop to use arrays. Then, define the array of points that you will draw, either as a global variable or somewhere else as long as it's accessible in the main loop. Next, enter glVertexPointer() to use your array. Last, simply call glDrawArrays(). The following code will illustrate the example of drawing a triangle in the main loop:</p>
-<img src="img3.png" alt="" border="4" style="border-color: white" width = 200 align="right">
+<img src="img3.png" alt="" border="4" style="border-color: white; width: 200px; height: auto" align=right>
 <div class="highlight"><pre class="highlight"><code>GLfloat myTriangle[3*2];
 myTriangle[0] = newWidth(100); myTriangle[1] = newHeight(0);
 myTriangle[2] = newWidth(-100); myTriangle[3] = newHeight(0);
